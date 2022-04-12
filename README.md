@@ -1,5 +1,6 @@
 # job-board-scraper
 Scrape job posting statistics by keyword &amp; location
+Currently only supports Indeed.com job board.
 
 # Status
 Work in progress.
