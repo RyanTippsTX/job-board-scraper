@@ -63,29 +63,16 @@ run_report (){
 }
 
 # Execute !!
-run_report
+# run_report
 
+# ---------- DEBUG ----------
 
-# location="San Francisco, CA"
-# search_term="Python"
+# This URL works. "Austin,TX" has no spaces, but interestingly does have a comma.
+scrape_url='https://www.indeed.com/jobs?q=Java&l=Austin,TX&radius=50'
 
-#   # testing='hello world'
-#   # echo ${testing//' '/'%20'}
+# These URLs do not work in curl, but DOES work in the browser. When entered into the 
+# browser, it appears to redirect and oddly encodes the comma but not the space. 
+# scrape_url='https://www.indeed.com/jobs?q=Java&l=Austin, TX&radius=50'
+# scrape_url='https://www.indeed.com/jobs?q=Java&l=San Antonio, TX&radius=50'
 
-#   scrape_url="https://www.indeed.com/jobs"
-#   scrape_url+="?"
-#   scrape_url+="q=${search_term//' '/'%20'}"
-#   scrape_url+="&"
-#   scrape_url+="q=${location//' '/%20}"
-#   if [ ${location} != 'remote' ] 
-#   then
-#     scrape_url+="&"
-#     scrape_url+="radius=50"
-#   fi
-#   scrape_url+="&"
-#   scrape_url+="fromage=14"
-#   echo $scrape_url
-
-# curl $scrape_url
-# curl 'https://www.indeed.com/jobs?q=Python&q=San%20Francisco,%20CA&radius=50&fromage=14'
-# curl 'https://www.indeed.com/jobs?q=python&l=San Francisco%2C CA'
+curl -s $scrape_url
