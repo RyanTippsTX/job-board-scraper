@@ -7,12 +7,11 @@ normalize_string () {
   # removes spaces, commas, periods, and apostrophies from input string, replaces with
   # I created this to avoid using the non-portable sed command
 
-  # remove_characters=(' ' , . \')
   replace_with='-'
   A=${1// /$replace_with}
   B=${A//,}
   C=${B//./$replace_with}
-  D=${C//\'/$replace_with}
+  D=${C//\'/}
   echo $D
 }
 
@@ -51,39 +50,44 @@ scrape_Indeed () {
 run_report (){
   # Aggregates data and prints report to stdout
 
-  # locations not are wired in manually for now... 
   declare -a locations=(
     'Remote' 
     'Austin, TX'
   )
 
   declare -a search_terms=(
-    # 'Java'
-    # 'Spring' 
-    # 'PHP'
-    # 'Laravel'
-    # 'Rails' 
-    # 'Django' 
-    # 'Flask' 
-    # 'Node'
-    # 'Angular'
+    'Java'
+    'Spring' 
+    'PHP'
+    'Laravel'
+    'Rails' 
+    'Django' 
+    'Flask' 
+    'Node'
+    'Angular'
     'React'
     'Vue'
   )
 
   # Scrape the data asynchronously
   declare -A data
-  for T in "${search_terms[@]}"
-  do
-    for L in "${locations[@]}"
+  while read -r AA BB;
+  do 
+    data[$AA]=$BB
+  done < <(
+    for T in "${search_terms[@]}"
     do
-      index="L-$(normalize_string $L)-T-$(normalize_string $T)"
-      # data+=([$index]="L-$(normalize_string $L)-T-$(normalize_string $T)")
-      data+=([$index]="$(scrape_Indeed $L $T)")
-      # data+=([$index]="$(scrape_Indeed $L $T)") &
+      for L in "${locations[@]}"
+      do
+        (
+          index="L-$(normalize_string $L)-T-$(normalize_string $T)"
+          value="$(scrape_Indeed $L $T)"
+          echo $index $value
+        ) &
+      done
     done
-  done
-  # wait
+    wait
+  );
 
   # Print output:
   printf "%s\n" 'Indeed.com job postings in last 14 days by location and keyword mentions:'
