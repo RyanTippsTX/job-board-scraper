@@ -3,6 +3,27 @@
 # Author : Ryan Tipps
 # License : MIT
 
+# USER INPUTS FOR 
+  declare -a locations=(
+    'Remote' 
+    'Austin, TX'
+    # 'San Antonio, TX'
+  )
+  declare -a search_terms=(
+    'Java'
+    'Spring' 
+    'PHP'
+    'Laravel'
+    'Rails' 
+    'Django' 
+    'Flask' 
+    'Node'
+    'Angular'
+    'React'
+    'Vue'
+  )
+
+
 normalize_string () {
   # removes spaces, commas, periods, and apostrophies from input string, replaces with
   # I created this to avoid using the non-portable sed command
@@ -49,25 +70,6 @@ scrape_Indeed () {
 
 run_report (){
   # Aggregates data and prints report to stdout
-
-  declare -a locations=(
-    'Remote' 
-    'Austin, TX'
-  )
-
-  declare -a search_terms=(
-    'Java'
-    'Spring' 
-    'PHP'
-    'Laravel'
-    'Rails' 
-    'Django' 
-    'Flask' 
-    'Node'
-    'Angular'
-    'React'
-    'Vue'
-  )
 
   # Scrape the data asynchronously
   declare -A data
