@@ -7,7 +7,6 @@ normalize_string () {
   # removes spaces, commas, periods, and apostrophies from input string, replaces with
   # I created this to avoid using the non-portable sed command
 
-  # remove_characters=(' ' , . \')
   replace_with='-'
   A=${1// /$replace_with}
   B=${A//,}
@@ -51,21 +50,20 @@ scrape_Indeed () {
 run_report (){
   # Aggregates data and prints report to stdout
 
-  # locations not are wired in manually for now... 
   declare -a locations=(
     'Remote' 
     'Austin, TX'
   )
 
   declare -a search_terms=(
-    # 'Java'
-    # 'Spring' 
-    # 'PHP'
-    # 'Laravel'
-    # 'Rails' 
-    # 'Django' 
-    # 'Flask' 
-    # 'Node'
+    'Java'
+    'Spring' 
+    'PHP'
+    'Laravel'
+    'Rails' 
+    'Django' 
+    'Flask' 
+    'Node'
     'Angular'
     'React'
     'Vue'
@@ -73,17 +71,23 @@ run_report (){
 
   # Scrape the data asynchronously
   declare -A data
-  for T in "${search_terms[@]}"
-  do
-    for L in "${locations[@]}"
+  while read -r AA BB;
+  do 
+    data[$AA]=$BB
+  done < <(
+    for T in "${search_terms[@]}"
     do
-    (
-      index="L-$(normalize_string $L)-T-$(normalize_string $T)"
-      data+=([$index]="$(scrape_Indeed $L $T)")
-    ) &
+      for L in "${locations[@]}"
+      do
+        (
+          index="L-$(normalize_string $L)-T-$(normalize_string $T)"
+          value="$(scrape_Indeed $L $T)"
+          echo $index $value
+        ) &
+      done
     done
-  done
-  wait
+    wait
+  );
 
   # Print output:
   printf "%s\n" 'Indeed.com job postings in last 14 days by location and keyword mentions:'
@@ -115,40 +119,4 @@ run_report (){
 }
 
 # Execute !!
-# run_report
-
-
-
-# -----------------
-
-
-# task (){ sleep 1;echo "hello $1"; }
-# arr=()
-
-# for i in {1..3}; do
-#     arr+=("$(task $i)")
-# done
-
-# for i in "${arr[@]}"; do
-#     echo "$i x";
-# done
-
-
-# -----------------
-
-# task() { sleep 1; echo "$1"; }
-# $ time while read -r line; do arr+=("$line"); done < <(for x in 1 2 3 ; do task "$x" & done) # real    0m1.006s
-# $ declare -p arr
-# # declare -a arr=([0]="2" [1]="1" [2]="3")
-
-task() { sleep 1; echo "$1"; }
-while read -r line; 
-do arr+=("$line"); 
-done < <(
-  for x in 1 2 3 
-  do 
-    task "$x" & 
-  done
-)
-declare -p arr
-echo $arr[@]
+run_report
