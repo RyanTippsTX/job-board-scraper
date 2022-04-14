@@ -3,34 +3,47 @@
 # Author : Ryan Tipps
 # License : MIT
 
+normalize_string () {
+  # removes spaces, commas, periods, and apostrophies from input string, replaces with
+  # I created this to avoid using the non-portable sed command
+
+  # remove_characters=(' ' , . \')
+  replace_with='-'
+  A=${1// /$replace_with}
+  B=${A//,}
+  C=${B//./$replace_with}
+  D=${C//\'/$replace_with}
+  echo $D
+}
+
 scrape_Indeed () { 
   # Scrapes the reported number of matching job postings from an indivudual query on Indeed.com job board.
 
   # Build URL based on search parameters:
-  # NOTE: Indeed URL-encodes spaces (%20) but NOT commas. This is non-standard. Therefore we have to manually URL-encode rather than using curl's built-in URL encoding.
+  # NOTE: Indeed URL-encodes spaces (%20) but NOT commas. This is non-standard. Therefore we have to 
+  # manually URL-encode rather than using curl's built-in URL encoding.
   location=$1
+  radius=50 # leave hard coded for now
   search_term=$2
-
-  # testing='hello world'
-  # echo ${testing//' '/'%20'}
-
+  from_age=14 # leave hard coded for now
   scrape_url="https://www.indeed.com/jobs"
   scrape_url+="?"
-  scrape_url+="q=${search_term//' '/'%20'}"
+  scrape_url+="q=${search_term//' '/%20}"
+  scrape_url+='&'
+  scrape_url+="l=${location//' '/%20}"
+  if [ $location:l != 'remote' ] 
+  then
+    scrape_url+="&"
+    scrape_url+="radius=$radius"
+  fi  
   scrape_url+="&"
-  scrape_url+="q=${location//' '/'%20'}"
-  # if [ ${location,,} != 'remote' ] 
-  # then
-  #   scrape_url+="&"
-  #   scrape_url+="radius=50"
-  # fi
-  scrape_url+="&"
-  scrape_url+="fromage=14"
+  scrape_url+="fromage=$from_age"
+  # echo $scrape_url
   # Typical resulting URL: https://www.indeed.com/jobs?q=Java&l=remote&fromage=14
-  
 
   # Fetch page from Indeed and scrape the reported result:
-  # This is very site specific and prone to breaking. Needs improvement!
+  # This scrape is very site-specific to Indeed.com and prone to breaking. Needs improvement!
+  # echo $scrape_url
   curl -s $scrape_url | grep -E "[0-9]+ jobs</div>" | cut -d' ' -f 24
 }
 
@@ -38,41 +51,66 @@ scrape_Indeed () {
 run_report (){
   # Aggregates data and prints report to stdout
 
-  echo -e 'Indeed.com job postings in last 14 days by location and keyword mentions:\n'
-  echo -e "SEARCH TERM \tREMOTE \t\tAUSTIN"  
-
   # locations not are wired in manually for now... 
-  # declare -a LOCATIONS=(
-  #   'Remote' 
-  #   'Austin,TX&radius=50'
-  #   )
+  declare -a locations=(
+    'Remote' 
+    'Austin, TX'
+  )
 
   declare -a search_terms=(
-    'Rails' 
-    'Django' 
-    'Node'
+    # 'Java'
+    # 'Spring' 
+    # 'PHP'
+    # 'Laravel'
+    # 'Rails' 
+    # 'Django' 
+    # 'Flask' 
+    # 'Node'
     'Angular'
     'React'
-    'Vue'
-    )
-  for t in "${search_terms[@]}"
+    # 'Vue'
+  )
+
+  # Scrape the data asynchronously
+  declare -A data
+  for T in "${search_terms[@]}"
   do
-    echo -e "$t\t\t$( scrape_Indeed 'Remote' $t )\t\t$( scrape_Indeed 'Austin,TX&radius=50' $t )" &
+    for L in "${locations[@]}"
+    do
+      index="L-$(normalize_string $L)-T-$(normalize_string $T)"
+      data+=([$index]="L-$(normalize_string $L)-T-$(normalize_string $T)")
+    done
   done
-  wait
+  # wait
+
+  # Print output:
+  printf "%s\n" 'Indeed.com job postings in last 14 days by location and keyword mentions:'
+  printf "%s\n"
+  (
+    # Print column headers
+    printf "\n%s" "SEARCH TERM" 
+    for L in "${locations[@]}"
+    do
+      printf '_'
+      printf $L:u
+    done
+    printf "%s\n"
+
+    # Print data rows
+    for T in "${search_terms[@]}"
+    do
+      printf $T
+      for L in "${locations[@]}"
+      do
+        printf '_'
+        index="L-$(normalize_string $L)-T-$(normalize_string $T)"
+        printf "${data[$index]}"
+      done
+      printf "%s\n"
+    done
+
+  ) | column -t -s '_'
 }
 
 # Execute !!
-# run_report
-
-# ---------- DEBUG ----------
-
-# This URL works. "Austin,TX" has no spaces, but interestingly does have a comma.
-scrape_url='https://www.indeed.com/jobs?q=Java&l=Austin,TX&radius=50'
-
-# These URLs do not work in curl, but DOES work in the browser. When entered into the 
-# browser, it appears to redirect and oddly encodes the comma but not the space. 
-# scrape_url='https://www.indeed.com/jobs?q=Java&l=Austin, TX&radius=50'
-# scrape_url='https://www.indeed.com/jobs?q=Java&l=San Antonio, TX&radius=50'
-
-curl -s $scrape_url
+run_report
