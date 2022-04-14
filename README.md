@@ -1,4 +1,4 @@
-# job-board-scraper
+# Job Board Scraper
 Scrape job posting statistics by keyword &amp; location.
 Currently only supports Indeed.com job board.
 
@@ -12,3 +12,6 @@ Currently only supports Indeed.com job board.
 4. Run the script with Z-shell  
 ```zsh job-board-scraper.sh```  
 <img width="652" alt="image" src="https://user-images.githubusercontent.com/89077432/163337787-5512878a-c719-418b-9db4-135655c1f010.png">  
+
+# Issues
+- One known bug (see issue #4 ). Occasionally the script will fail to scrape data for certain queries. Usually re-running the script once or twice will fix the issue. 
