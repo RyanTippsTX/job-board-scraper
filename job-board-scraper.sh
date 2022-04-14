@@ -12,7 +12,7 @@ normalize_string () {
   A=${1// /$replace_with}
   B=${A//,}
   C=${B//./$replace_with}
-  D=${C//\'/$replace_with}
+  D=${C//\'/}
   echo $D
 }
 
@@ -66,7 +66,7 @@ run_report (){
     # 'Django' 
     # 'Flask' 
     # 'Node'
-    # 'Angular'
+    'Angular'
     'React'
     'Vue'
   )
@@ -77,13 +77,13 @@ run_report (){
   do
     for L in "${locations[@]}"
     do
+    (
       index="L-$(normalize_string $L)-T-$(normalize_string $T)"
-      # data+=([$index]="L-$(normalize_string $L)-T-$(normalize_string $T)")
       data+=([$index]="$(scrape_Indeed $L $T)")
-      # data+=([$index]="$(scrape_Indeed $L $T)") &
+    ) &
     done
   done
-  # wait
+  wait
 
   # Print output:
   printf "%s\n" 'Indeed.com job postings in last 14 days by location and keyword mentions:'
@@ -115,4 +115,40 @@ run_report (){
 }
 
 # Execute !!
-run_report
+# run_report
+
+
+
+# -----------------
+
+
+# task (){ sleep 1;echo "hello $1"; }
+# arr=()
+
+# for i in {1..3}; do
+#     arr+=("$(task $i)")
+# done
+
+# for i in "${arr[@]}"; do
+#     echo "$i x";
+# done
+
+
+# -----------------
+
+# task() { sleep 1; echo "$1"; }
+# $ time while read -r line; do arr+=("$line"); done < <(for x in 1 2 3 ; do task "$x" & done) # real    0m1.006s
+# $ declare -p arr
+# # declare -a arr=([0]="2" [1]="1" [2]="3")
+
+task() { sleep 1; echo "$1"; }
+while read -r line; 
+do arr+=("$line"); 
+done < <(
+  for x in 1 2 3 
+  do 
+    task "$x" & 
+  done
+)
+declare -p arr
+echo $arr[@]
