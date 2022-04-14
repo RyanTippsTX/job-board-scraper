@@ -66,9 +66,9 @@ run_report (){
     # 'Django' 
     # 'Flask' 
     # 'Node'
-    'Angular'
+    # 'Angular'
     'React'
-    # 'Vue'
+    'Vue'
   )
 
   # Scrape the data asynchronously
@@ -78,7 +78,9 @@ run_report (){
     for L in "${locations[@]}"
     do
       index="L-$(normalize_string $L)-T-$(normalize_string $T)"
-      data+=([$index]="L-$(normalize_string $L)-T-$(normalize_string $T)")
+      # data+=([$index]="L-$(normalize_string $L)-T-$(normalize_string $T)")
+      data+=([$index]="$(scrape_Indeed $L $T)")
+      # data+=([$index]="$(scrape_Indeed $L $T)") &
     done
   done
   # wait
